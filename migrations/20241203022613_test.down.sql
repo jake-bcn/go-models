@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS `user_varchar`;
+DROP TABLE IF EXISTS `user`;
+

@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Debug All Tests",
+          "type": "go",
+          "request": "launch",
+          "mode": "test",
+          "program": "${workspaceFolder}/core",
+          "args": ["./..."],
+          "env": {},
+          "showLog": true
+      }
+  ]
+}
