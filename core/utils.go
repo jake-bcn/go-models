@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -197,7 +196,7 @@ func ConvertToTime(data interface{}) time.Time {
 	}
 	t, err := time.Parse("2006-01-02 15:04:05", ConvertToString(data))
 	if err != nil {
-		fmt.Println("解析时间失败:", err)
+		//fmt.Println("解析时间失败:", err)
 		return time.Time{}
 	}
 

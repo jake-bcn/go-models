@@ -111,3 +111,12 @@ func (e *UserTest) AfterSave(tablemodel Basictablemodelinterface){
 	
 }
 ```
+
+##  BasicModelBeforeSaveInterface
+``` go
+func (e *UserTest) BeforeSave(tablemodel Basictablemodelinterface) {
+	if tablemodel.GetData("name") == "error" {
+		panic("cannot save name if error")
+	}
+}
+```

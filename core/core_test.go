@@ -43,6 +43,12 @@ func (e *UserTest) GetPrimaryFieldName() string {
 	return "entity_id"
 }
 
+func (e *UserTest) BeforeSave(tablemodel Basictablemodelinterface) {
+	if tablemodel.GetData("name") == "error" {
+		panic("cannot save name if error")
+	}
+}
+
 func ConvertModelToUserTest(tableModel Basictablemodelinterface) *UserTest {
 	model := tableModel.GetModel()
 
@@ -128,11 +134,23 @@ func TestCreateUser(t *testing.T) {
 	userModel := GetUserTestFactory("en-US", "en-US")
 	userModel.SetData("name", "John Doe").SetData("age", 22).Save()
 	user := ConvertModelToUserTest(userModel)
-	assert.NotNil(user.EntityId)
+	assert.NotEqual(user.EntityId, uint64(0))
 	assert.Equal("John Doe", user.Name)
 	assert.True(user.Age == 22)
 	assert.False(user.UpdatedAt.IsZero(), "updated at is zero")
 	assert.False(user.CreatedAt.IsZero(), "updated at is zero")
+}
+
+func TestCreateErrorUser(t *testing.T) {
+	assert := assert.New(t)
+
+	userModel := GetUserTestFactory("en-US", "en-US")
+	userModel.SetData("name", "error").SetData("age", 22).Save()
+	user := ConvertModelToUserTest(userModel)
+	assert.Equal(user.EntityId, uint64(0))
+	error := userModel.GetLastError()
+	assert.NotNil(error)
+	assert.EqualError(error, "cannot save name if error")
 }
 
 func TestGetUserByID(t *testing.T) {

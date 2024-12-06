@@ -34,6 +34,7 @@ type Basictablemodelinterface interface {
 	GetLocale() string
 	GetEavFields() map[string]Field
 	GetDefaultLocale() string
+	GetLastError() error
 }
 type Basictablemodel struct {
 	ResourceModel *basictableResource
@@ -42,6 +43,10 @@ type Basictablemodel struct {
 	Locale        string
 	DefaultLocale string
 	LastError     error
+}
+
+func (e *Basictablemodel) GetLastError() error {
+	return e.LastError
 }
 
 func (e *Basictablemodel) _transaction(callback func()) {
@@ -69,6 +74,9 @@ func (e *Basictablemodel) _transaction(callback func()) {
 
 func (e *Basictablemodel) Save() Basictablemodelinterface {
 	e._transaction(func() {
+		if m, ok := interface{}(e.Model).(BasicModelBeforeSaveInterface); ok {
+			m.BeforeSave(e)
+		}
 		e.ResourceModel.Save()
 		if m, ok := interface{}(e.Model).(BasicModelSaveInterface); ok {
 			m.AfterSave(e)

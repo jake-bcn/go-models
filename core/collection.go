@@ -26,6 +26,7 @@ type CollectionInterface interface {
 	AddFieldToSelect(string) CollectionInterface
 	AddOrder(order string, dir string) CollectionInterface
 	Create() Basictablemodelinterface
+	GetLastError() error
 }
 
 type Collection struct {
@@ -42,6 +43,10 @@ type Collection struct {
 	Model              Basictablemodelinterface
 	ColumnsOfMaintable []string
 	LastError          error
+}
+
+func (e *Collection) GetLastError() error {
+	return e.LastError
 }
 
 func (e *Collection) _transaction(callback func()) {
