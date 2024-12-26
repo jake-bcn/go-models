@@ -290,11 +290,25 @@ func (e *basictableResource) LoadByField(field string, value interface{}) Basict
 func (e *basictableResource) Delete() BasictableResourceInterface {
 	table := e.Model.GetTableName()
 	primaryValue := e.GetData(e.Model.GetPrimaryFieldName())
-	sql := e.Connection.Expr("select "+e.Model.GetPrimaryFieldName()+" from "+e.Model.GetTableName()+" where "+e.Model.GetPrimaryFieldName()+"=?", primaryValue)
-	dbId := e.Connection.FetchOne(sql)
-	if dbId != nil {
-		e.Connection.Delete(table, e.Connection.Expr(e.Model.GetPrimaryFieldName()+"=?", primaryValue))
+	if e.Model.GetPrimaryFieldName() != "" {
+		sql := e.Connection.Expr("select "+e.Model.GetPrimaryFieldName()+" from "+e.Model.GetTableName()+" where "+e.Model.GetPrimaryFieldName()+"=?", primaryValue)
+		dbId := e.Connection.FetchOne(sql)
+		if dbId != nil {
+			e.Connection.Delete(table, e.Connection.Expr(e.Model.GetPrimaryFieldName()+"=?", primaryValue))
+		}
+	} else if fields := e.Model.GetDeleteFields(); len(fields) > 0 {
+		sql := ""
+		values := make([]interface{}, 0)
+		for _, code := range fields {
+			if sql != "" {
+				sql += " and "
+			}
+			sql += code + " =? "
+			values = append(values, e.GetData(code))
+		}
+		e.Connection.Delete(table, e.Connection.Expr(sql, values))
 	}
+
 	return e
 }
 

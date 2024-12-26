@@ -35,6 +35,7 @@ type Basictablemodelinterface interface {
 	GetEavFields() map[string]Field
 	GetDefaultLocale() string
 	GetLastError() error
+	GetDeleteFields() []string
 }
 type Basictablemodel struct {
 	ResourceModel *basictableResource
@@ -84,6 +85,7 @@ func (e *Basictablemodel) Save() Basictablemodelinterface {
 	})
 	return e
 }
+
 func (e *Basictablemodel) Delete() Basictablemodelinterface {
 	e._transaction(func() {
 		e.ResourceModel.Delete()
@@ -164,4 +166,11 @@ func (e *Basictablemodel) GetEavFields() map[string]Field {
 		}
 	}
 	return fields
+}
+func (e *Basictablemodel) GetDeleteFields() []string {
+	var result []string
+	if m, ok := interface{}(e.Model).(BasicModelGetDeleteFieldsInterface); ok {
+		return m.GetDeleteFields(e)
+	}
+	return result
 }

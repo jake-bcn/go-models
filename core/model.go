@@ -14,6 +14,9 @@ type BasicModelLoadInterface interface {
 type BasicModelDeleteInterface interface {
 	AfterDelete(Basictablemodelinterface)
 }
+type BasicModelGetDeleteFieldsInterface interface {
+	GetDeleteFields(Basictablemodelinterface) []string
+}
 
 type BasicModelBeforeSaveInterface interface {
 	BeforeSave(Basictablemodelinterface)
