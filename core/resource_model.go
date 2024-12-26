@@ -306,7 +306,7 @@ func (e *basictableResource) Delete() BasictableResourceInterface {
 			sql += code + " =? "
 			values = append(values, e.GetData(code))
 		}
-		e.Connection.Delete(table, e.Connection.Expr(sql, values))
+		e.Connection.Delete(table, e.Connection.Expr(sql, values...))
 	}
 
 	return e
