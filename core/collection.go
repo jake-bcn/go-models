@@ -210,6 +210,8 @@ func (e *Collection) AddFieldToFilter(values map[string]map[string]interface{}) 
 				}
 				if strings.ToLower(condition) == "in" {
 					sql += "(" + field + " " + condition + "(?)" + ") and"
+				} else if strings.ToLower(condition) == "not in" {
+					sql += "(" + field + " " + condition + "(?)" + ") and"
 				} else {
 					sql += "(" + field + " " + condition + "?" + ") and"
 				}
