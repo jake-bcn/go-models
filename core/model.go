@@ -11,6 +11,11 @@ type EavModelInterface interface {
 type BasicModelLoadInterface interface {
 	AfterLoad(Basictablemodelinterface)
 }
+
+type BasicModelDeleteBeforeInterface interface {
+	BeforeDelete(Basictablemodelinterface)
+}
+
 type BasicModelDeleteInterface interface {
 	AfterDelete(Basictablemodelinterface)
 }

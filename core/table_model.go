@@ -88,6 +88,9 @@ func (e *Basictablemodel) Save() Basictablemodelinterface {
 
 func (e *Basictablemodel) Delete() Basictablemodelinterface {
 	e._transaction(func() {
+		if m, ok := interface{}(e.Model).(BasicModelDeleteBeforeInterface); ok {
+			m.BeforeDelete(e)
+		}
 		e.ResourceModel.Delete()
 		if m, ok := interface{}(e.Model).(BasicModelDeleteInterface); ok {
 			m.AfterDelete(e)
