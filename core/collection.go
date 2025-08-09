@@ -209,13 +209,13 @@ func (e *Collection) AddFieldToFilter(values map[string]map[string]interface{}) 
 					}
 				}
 				if strings.ToLower(condition) == "in" {
-					sql += "(" + field + " " + condition + "(?)" + ") and"
+					sql += "(" + field + " " + condition + " (?)" + ") and"
 				} else if strings.ToLower(condition) == "not in" {
-					sql += "(" + field + " " + condition + "(?)" + ") and"
+					sql += "(" + field + " " + condition + " (?)" + ") and"
 				} else if strings.ToLower(condition) == "null" || strings.ToLower(condition) == "not null" {
 					sql += "(" + field + " is " + condition + ")" + " and"
 				} else {
-					sql += "(" + field + " " + condition + "?" + ") and"
+					sql += "(" + field + " " + condition + " ?" + ") and"
 				}
 				fieldValues = append(fieldValues, value)
 			}
