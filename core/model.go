@@ -34,6 +34,10 @@ type CollectionFieldInterface interface {
 	AddJoinField(collection CollectionInterface, field string) string
 }
 
+type IsInnerTableEavInterface interface {
+	IsInnerTableEav() bool
+}
+
 func ModelFactory(callback func() Basictablemodelinterface) Basictablemodelinterface {
 	tableModel := callback()
 	tableModel.Init()

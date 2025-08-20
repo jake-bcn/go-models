@@ -115,7 +115,18 @@ func (e *Basictablemodel) LoadById(id interface{}) Basictablemodelinterface {
 }
 
 func (e *Basictablemodel) GetTableName() string {
-	return e.Model.GetTableName()
+	table := e.Model.GetTableName()
+	locale := e.GetLocale()
+	defaultLocale := e.GetDefaultLocale()
+
+	if e, ok := interface{}(e.Model).(IsInnerTableEavInterface); ok {
+		if e.IsInnerTableEav() {
+			// 要將 table 中的___{{default_locale}}___ 用 e.GetDefaultLocale() 替換， ___{{locale}}___ 用 e.GetLocale()替換
+			table = strings.Replace(table, "___{{default_locale}}___", locale, -1)
+			table = strings.Replace(table, "___{{locale}}___", defaultLocale, -1)
+		}
+	}
+	return table
 }
 
 func (e *Basictablemodel) GetTableFields() map[string]Field {
