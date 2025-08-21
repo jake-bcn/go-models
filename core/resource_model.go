@@ -276,7 +276,7 @@ func (e *basictableResource) LoadByField(field string, value interface{}) Basict
 	eavFields := e.Model.GetEavFields()
 	sql := ""
 	if len(eavFields) == 0 {
-		sql = e.Connection.Expr("select * from "+e.Model.GetTableName()+" where "+field+"=?", value)
+		sql = e.Connection.Expr("select * from "+e.Model.GetTableName()+" as t where "+field+"=?", value)
 	} else {
 		//sql := fmt.Sprintf("select m.* from %s as m ", e.Model.GetTableName())
 		sql = e.Connection.Expr("select * from "+e.GetEavAsTable()+"as t where "+field+"=?", value)
