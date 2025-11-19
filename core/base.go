@@ -50,7 +50,7 @@ func InitDB(dsn string, connectionName string) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(50)
 	sqlDB.SetMaxOpenConns(150)
 	sqlDB.SetConnMaxLifetime(time.Second * 25)
-	AddConnect(connectionName, db)
+	addConnect(connectionName, db)
 	return db, nil
 }
 func CloseDb(connectionName string) {

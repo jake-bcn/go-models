@@ -29,7 +29,7 @@ func (this *DBConnection) Init(adapter string) DBConnectionInterface {
 	if !ok {
 		return this
 	}
-	this.Db = db
+	this.Db = db.Session(&gorm.Session{})
 	return this
 }
 func (this *DBConnection) Fetch(sql string) []map[string]interface{} {
@@ -274,13 +274,13 @@ var Db map[string]*gorm.DB
 func init() {
 	Db = make(map[string]*gorm.DB)
 }
-func AddConnect(connectionName string, db *gorm.DB) {
+func addConnect(connectionName string, db *gorm.DB) {
 	Db[connectionName] = db
 }
 func GetConnection(connectionName string) *gorm.DB {
 	db, ok := Db[connectionName]
 	if ok {
-		return db
+		return db.Session(&gorm.Session{})
 	}
 	return nil
 }
