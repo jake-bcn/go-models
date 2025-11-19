@@ -97,6 +97,7 @@ func (e *Collection) Load() CollectionInterface {
 			rows := e.Connection.Fetch(sql)
 			for _, row := range rows {
 				model := e.Factory().Init()
+				model.GetConnection().SetDb(e.Connection.GetDb())
 				model.GetResourceModel().LoadDbData(row)
 				if m, ok := interface{}(model.GetModel()).(BasicModelLoadInterface); ok {
 					m.AfterLoad(model)
