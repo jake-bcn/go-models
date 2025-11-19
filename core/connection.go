@@ -18,6 +18,8 @@ type DBConnectionInterface interface {
 	Delete(table string, condition string) DBConnectionInterface
 	Update(table string, data map[string]interface{}, condition string) DBConnectionInterface
 	Expr(sql string, values ...interface{}) string
+	GetDb() *gorm.DB
+	SetDb(db *gorm.DB) DBConnectionInterface
 }
 
 type DBConnection struct {
@@ -30,6 +32,13 @@ func (this *DBConnection) Init(adapter string) DBConnectionInterface {
 		return this
 	}
 	this.Db = db.Session(&gorm.Session{})
+	return this
+}
+func (this *DBConnection) GetDb() *gorm.DB {
+	return this.Db
+}
+func (this *DBConnection) SetDb(db *gorm.DB) DBConnectionInterface {
+	this.Db = db
 	return this
 }
 func (this *DBConnection) Fetch(sql string) []map[string]interface{} {

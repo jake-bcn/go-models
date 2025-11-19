@@ -50,7 +50,7 @@ func (e *Collection) GetLastError() error {
 }
 
 func (e *Collection) _transaction(callback func()) {
-	db := GetConnection(e.Model.GetConnectionName())
+	db := e.Model.GetResourceModel().GetConnection().GetDb()
 	e.LastError = nil
 	if db != nil {
 		db.Transaction(func(tx *gorm.DB) error {
