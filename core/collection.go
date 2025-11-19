@@ -64,6 +64,7 @@ func (e *Collection) _transaction(callback func()) {
 					default:
 						e.LastError = fmt.Errorf("unexpected error: %v", r)
 					}
+					panic(e.LastError)
 				}
 			}()
 			callback()
