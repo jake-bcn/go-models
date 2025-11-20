@@ -53,23 +53,45 @@ func (e *Collection) _transaction(callback func()) {
 	db := e.Model.GetResourceModel().GetConnection().GetDb()
 	e.LastError = nil
 	if db != nil {
-		db.Transaction(func(tx *gorm.DB) error {
-			defer func() {
-				if r := recover(); r != nil {
-					switch x := r.(type) {
-					case string:
-						e.LastError = errors.New(x)
-					case error:
-						e.LastError = x
-					default:
-						e.LastError = fmt.Errorf("unexpected error: %v", r)
+		if tx, ok := db.Statement.ConnPool.(gorm.TxCommitter); ok && tx != nil {
+			// 已經在事務中，直接執行 callback
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						switch x := r.(type) {
+						case string:
+							e.LastError = errors.New(x)
+						case error:
+							e.LastError = x
+						default:
+							e.LastError = fmt.Errorf("unexpected error: %v", r)
+						}
 					}
-					panic(e.LastError)
-				}
+				}()
+				callback()
 			}()
-			callback()
-			return nil
-		})
+		} else {
+			db.Transaction(func(tx *gorm.DB) error {
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							switch x := r.(type) {
+							case string:
+								e.LastError = errors.New(x)
+							case error:
+								e.LastError = x
+							default:
+								e.LastError = fmt.Errorf("unexpected error: %v", r)
+							}
+						} else {
+						}
+					}()
+					callback()
+				}()
+				return e.LastError
+			})
+		}
+
 	}
 }
 

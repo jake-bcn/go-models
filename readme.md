@@ -120,3 +120,37 @@ func (e *UserTest) BeforeSave(tablemodel Basictablemodelinterface) {
 	}
 }
 ```
+
+
+
+## 注意
+### 事務處理, 保证嵌套事务在一条线中执行, userModel.GetConnection().SetDb(tx)， 必須在事務中執行
+```
+    db := GetConnection("default")
+	// 开始事务
+	db.Transaction(func(tx *gorm.DB) error {
+		// 插入多个用户
+		users := []map[string]interface{}{
+			{"name": "User1-tran", "age": 11, "zh_name": "中文 user1"},
+			{"name": "User2-tran", "age": "12", "zh_name": "中文 user2"},
+			{"name": "User3-tran", "age": "13", "zh_name": "中文 user3"},
+		}
+		for index, user := range users {
+			tx.Transaction(func(tx *gorm.DB) error {
+				userModel := GetUserTestFactory("en-US", "en-US")
+				userModel.GetConnection().SetDb(tx) // 必须set db 到事务中
+				userModel.SetData("name", user["name"]).SetData("age", user["age"]).Save()
+				dbuser := ConvertModelToUserTest(userModel)
+				userModel2 := GetUserTestFactory("zh-CN", "en-US")
+				userModel2.GetConnection().SetDb(tx)
+				userModel2.LoadById(dbuser.EntityId)
+				userModel2.SetData("name", user["zh_name"]).Save()
+				return nil
+			})
+			if index == 2 {
+				return errors.New("test transaction error")
+			}
+		}
+		return nil
+	})
+```

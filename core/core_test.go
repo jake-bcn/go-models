@@ -2,6 +2,7 @@ package core
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"os"
 	"testing"
@@ -80,7 +81,7 @@ var testDB *gorm.DB
 
 func TestMain(m *testing.M) {
 	// 数据库连接字符串（不包含数据库名）
-	dsn := "root:testing12121@tcp(127.0.0.1:3308)/?charset=utf8mb4&parseTime=True&loc=UTC"
+	dsn := "root:bc123123@tcp(127.0.0.1:3308)/?charset=utf8mb4&parseTime=True&loc=UTC"
 
 	// 打开数据库连接
 	db, err := sql.Open("mysql", dsn)
@@ -101,7 +102,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// 更新 dsn 包含新创建的数据库
-	dsn = "root:testing12121@tcp(127.0.0.1:3308)/" + testDBName + "?charset=utf8mb4&parseTime=True&loc=UTC"
+	dsn = "root:bc123123@tcp(127.0.0.1:3308)/" + testDBName + "?charset=utf8mb4&parseTime=True&loc=UTC"
 	migratedsn := "mysql://" + dsn
 
 	// 应用数据库迁移
@@ -306,4 +307,44 @@ func TestUtils(t *testing.T) {
 	assert.Equal(ConvertToTimeStringFromUTCToLocale(time, "Asia/Shanghai"), "2024-12-03 20:00:00")
 	assert.Equal(ConvertToTimeStringFromLocaleToUTC(time, "Asia/Shanghai"), "2024-12-03 04:00:00")
 
+}
+
+func testTransaction(t *testing.T) {
+	assert := assert.New(t)
+	userModelCollection := GetUserTestCollectionFactory("en-US", "en-US")
+	for _, user := range userModelCollection.GetElems() {
+		user.Delete()
+	}
+
+	db := GetConnection("default")
+	// 开始事务
+	db.Transaction(func(tx *gorm.DB) error {
+		// 插入多个用户
+		users := []map[string]interface{}{
+			{"name": "User1-tran", "age": 11, "zh_name": "中文 user1"},
+			{"name": "User2-tran", "age": "12", "zh_name": "中文 user2"},
+			{"name": "User3-tran", "age": "13", "zh_name": "中文 user3"},
+		}
+		for index, user := range users {
+			tx.Transaction(func(tx *gorm.DB) error {
+				userModel := GetUserTestFactory("en-US", "en-US")
+				userModel.GetConnection().SetDb(tx)
+				userModel.SetData("name", user["name"]).SetData("age", user["age"]).Save()
+				dbuser := ConvertModelToUserTest(userModel)
+				userModel2 := GetUserTestFactory("zh-CN", "en-US")
+				userModel2.GetConnection().SetDb(tx)
+				userModel2.LoadById(dbuser.EntityId)
+				userModel2.SetData("name", user["zh_name"]).Save()
+				return nil
+			})
+			if index == 2 {
+				return errors.New("test transaction error")
+			}
+		}
+		return nil
+	})
+
+	userModelCollection3 := GetUserTestCollectionFactory("zh-CN", "en-US")
+	dbUserModels3 := userModelCollection3.GetElems()
+	assert.Len(dbUserModels3, 0)
 }
