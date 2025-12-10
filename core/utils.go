@@ -209,9 +209,12 @@ func ConvertToTime(data interface{}) time.Time {
 func FormatTimeToString(t time.Time) string {
 	// 指定时间格式
 	layout := "2006-01-02 15:04:05"
-
+	if t.IsZero() {
+		return ""
+	}
 	// 格式化时间为指定格式
 	formattedTime := t.Format(layout)
+
 	return formattedTime
 }
 

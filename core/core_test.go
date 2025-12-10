@@ -303,9 +303,21 @@ func TestUtils(t *testing.T) {
 	assert.Equal(FormatTimeFromLocaleToUTC(timestr, "UTC"), "2024-12-03 12:00:00")
 	assert.Equal(FormatTimeFromLocaleToUTC(timestr, "Asia/Shanghai"), "2024-12-03 04:00:00")
 	time := ConvertToTime(timestr)
+	assert.Equal(time.IsZero(), false)
 	assert.Equal(ConvertToTimeString(time), "2024-12-03 12:00:00")
 	assert.Equal(ConvertToTimeStringFromUTCToLocale(time, "Asia/Shanghai"), "2024-12-03 20:00:00")
 	assert.Equal(ConvertToTimeStringFromLocaleToUTC(time, "Asia/Shanghai"), "2024-12-03 04:00:00")
+
+	timestr = ""
+	assert.Equal(FormatTimeFromUTCToLocale(timestr, "UTC"), "")
+	assert.Equal(FormatTimeFromUTCToLocale(timestr, "Asia/Shanghai"), "")
+	assert.Equal(FormatTimeFromLocaleToUTC(timestr, "UTC"), "")
+	assert.Equal(FormatTimeFromLocaleToUTC(timestr, "Asia/Shanghai"), "")
+	time = ConvertToTime(timestr)
+	assert.Equal(time.IsZero(), true)
+	assert.Equal(ConvertToTimeString(time), "")
+	assert.Equal(ConvertToTimeStringFromUTCToLocale(time, "Asia/Shanghai"), "")
+	assert.Equal(ConvertToTimeStringFromLocaleToUTC(time, "Asia/Shanghai"), "")
 
 }
 
