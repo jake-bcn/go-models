@@ -22,7 +22,8 @@ type CollectionInterface interface {
 	GetPageLength() int
 	GetPage() int
 	GetSelect() DBSelectInterface
-	AddFieldToFilter(map[string]map[string]interface{}) CollectionInterface // 格式： {"name"：{"="："abc"}},  {"name"：{"="："abc"},"price":{">":100}}
+	AddFieldToFilter(map[string]map[string]interface{}) CollectionInterface           // 格式： {"name"：{"="："abc"}},  {"name"：{"="："abc"},"price":{">":100}}
+	AddFieldToFilterAdvanced(map[string][]map[string]interface{}) CollectionInterface // 格式： {"name"：{"="："abc"}},  {"name"：{"="："abc"},"price":{">":100}}
 	AddFieldToSelect(string) CollectionInterface
 	AddOrder(order string, dir string) CollectionInterface
 	Create() Basictablemodelinterface
@@ -244,6 +245,50 @@ func (e *Collection) AddFieldToFilter(values map[string]map[string]interface{}) 
 				fieldValues = append(fieldValues, value)
 			}
 			sql = strings.TrimSuffix(sql, "and") + ") or"
+		}
+		sql = strings.TrimSuffix(sql, "or") + ")"
+	}
+	sql = e.Connection.Expr(sql, fieldValues...)
+	e.DbSelect.Where(sql)
+
+	return e
+}
+
+func (e *Collection) AddFieldToFilterAdvanced(values map[string][]map[string]interface{}) CollectionInterface {
+	// 複雜的select 請用原生的
+	sql := ""
+	fieldValues := make([]interface{}, 0)
+	if len(values) > 0 {
+		sql += "("
+		for field, fieldconditions := range values {
+			sql += "("
+			for _, fieldcondition := range fieldconditions {
+				sql += "("
+				for condition, value := range fieldcondition {
+					model, ok := e.Model.GetModel().(CollectionFieldInterface)
+					if ok {
+						field1 := model.AddJoinField(e, field)
+						if field1 == "" {
+							field = "e." + field
+						} else {
+							field = field1
+						}
+					}
+					if strings.ToLower(condition) == "in" {
+						sql += "(" + field + " " + condition + " (?)" + ") and"
+					} else if strings.ToLower(condition) == "not in" {
+						sql += "(" + field + " " + condition + " (?)" + ") and"
+					} else if strings.ToLower(condition) == "null" || strings.ToLower(condition) == "not null" {
+						sql += "(" + field + " is " + condition + ")" + " and"
+					} else {
+						sql += "(" + field + " " + condition + " ?" + ") and"
+					}
+					fieldValues = append(fieldValues, value)
+				}
+				sql = strings.TrimSuffix(sql, "and") + ") or"
+			}
+
+			sql = strings.TrimSuffix(sql, "or") + ") or"
 		}
 		sql = strings.TrimSuffix(sql, "or") + ")"
 	}

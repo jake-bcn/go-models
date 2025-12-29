@@ -3,6 +3,7 @@ package core
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -271,6 +272,48 @@ func TestListUsers(t *testing.T) {
 		assert.True(user["name"] == dbuser.GetData("name"))
 		assert.True(ConvertToInt32(user["age"]) == ConvertToInt32(dbuser.GetData("age")))
 	}
+	// 列出 filter 用戶
+	filterModelCollection := GetUserTestCollectionFactory("en-US", "en-US")
+	filterModelCollection.AddFieldToFilterAdvanced(map[string][]map[string]interface{}{
+		"name": {
+			{
+				"=": "User1",
+			},
+			{
+				"=": "User2",
+			},
+		},
+	})
+	filterModelCollection.Load()
+	fmt.Print(filterModelCollection.GetSelect().Assemble())
+	fmt.Println("")
+	assert.Len(filterModelCollection.GetElems(), 2)
+
+	// 列出 filter 用戶
+	filterModelCollection = GetUserTestCollectionFactory("en-US", "en-US")
+	filterModelCollection.AddFieldToFilter(map[string]map[string]interface{}{"name": {"like": "%%User%%"}})
+	filterModelCollection.AddFieldToFilterAdvanced(map[string][]map[string]interface{}{
+		"name": {
+			{
+				"=": "User1",
+			},
+			{
+				"=": "User2",
+			},
+		},
+		"age": {
+			{
+				"=": 12,
+			},
+			{
+				"=": 11,
+			},
+		},
+	})
+	filterModelCollection.Load()
+	fmt.Print(filterModelCollection.GetSelect().Assemble())
+	fmt.Println("")
+	assert.Len(filterModelCollection.GetElems(), 2)
 
 	// 列出所有用户
 	userModelCollection3 := GetUserTestCollectionFactory("zh-CN", "en-US")
