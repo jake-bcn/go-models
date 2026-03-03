@@ -23,6 +23,7 @@ type UserTest struct {
 	EntityId  uint64
 	Name      string
 	Age       uint32
+	IsActive  bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -36,6 +37,7 @@ func (e *UserTest) GetTableFields() map[string]Field {
 		"entity_id":  {Name: "EntityId", IsEav: false, DbType: "uint64"},
 		"name":       {Name: "Name", IsEav: true, DbType: "string", EavType: "varchar"},
 		"age":        {Name: "Age", IsEav: false, DbType: "uint32"},
+		"is_active":  {Name: "IsActive", IsEav: false, DbType: "bool"},
 		"created_at": {Name: "CreatedAt", IsEav: false, DbType: "time.Time", Autocreate: true},
 		"updated_at": {Name: "UpdatedAt", IsEav: false, DbType: "time.Time", Autocreate: true, Autoupdate: true},
 	}
@@ -134,11 +136,12 @@ func TestCreateUser(t *testing.T) {
 	assert := assert.New(t)
 
 	userModel := GetUserTestFactory("en-US", "en-US")
-	userModel.SetData("name", "John Doe").SetData("age", 22).Save()
+	userModel.SetData("name", "John Doe").SetData("age", 22).SetData("is_active", true).Save()
 	user := ConvertModelToUserTest(userModel)
 	assert.NotEqual(user.EntityId, uint64(0))
 	assert.Equal("John Doe", user.Name)
 	assert.True(user.Age == 22)
+	assert.True(user.IsActive, "bool field should be true")
 	assert.False(user.UpdatedAt.IsZero(), "updated at is zero")
 	assert.False(user.CreatedAt.IsZero(), "updated at is zero")
 }
@@ -364,14 +367,14 @@ func TestUtils(t *testing.T) {
 
 }
 
-func testTransaction(t *testing.T) {
+func TestTransaction(t *testing.T) {
 	assert := assert.New(t)
 	userModelCollection := GetUserTestCollectionFactory("en-US", "en-US")
 	for _, user := range userModelCollection.GetElems() {
 		user.Delete()
 	}
 
-	db := GetConnection("default")
+	db := GetConnection("test")
 	// 开始事务
 	db.Transaction(func(tx *gorm.DB) error {
 		// 插入多个用户

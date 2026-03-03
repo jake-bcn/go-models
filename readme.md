@@ -35,6 +35,7 @@ func (e *UserTest) GetTableName() string {
 }
 
 // 返回字段  ， 會通過反射 reflect 設置 struct 字段
+// 這裡的 DbType 可以設置為 "bool"（或 "boolean"），底層會自動處理真/假和數值0/1的轉換
 /**
   Name: struct 的字段名字 必須是public 的字段
   IsEav: 是否為eav 字段
@@ -48,6 +49,7 @@ func (e *UserTest) GetTableFields() map[string]Field {
 		"entity_id":  {Name: "EntityId", IsEav: false, DbType: "uint64"},
 		"name":       {Name: "Name", IsEav: true, DbType: "string", EavType: "varchar"},
 		"age":        {Name: "Age", IsEav: false, DbType: "uint32"},
+		"is_active":  {Name: "IsActive", IsEav: false, DbType: "bool"},
 		"created_at": {Name: "CreatedAt", IsEav: false, DbType: "time.Time", Autocreate: true},
 		"updated_at": {Name: "UpdatedAt", IsEav: false, DbType: "time.Time", Autocreate: true, Autoupdate: true},
 	}

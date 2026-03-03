@@ -81,6 +81,9 @@ func (e *basictableResource) Convert(field string, value interface{}) interface{
 		case "float32":
 			handleValue = ConvertToFloat32(value)
 
+		case "bool":
+			handleValue = ConvertToUint32(value)
+
 		case "time.Time":
 			handleValue = ConvertToTimeString(value)
 			if handleValue == "" {
@@ -106,10 +109,14 @@ func (e *basictableResource) SetData(field string, value interface{}) Basictable
 	if modelField, ok := e.GetFieldDefByName(field); ok {
 		// 通过反射设置结构体变量的值
 		// time.Time  // TODO: aa
-		if modelField.DbType == "time.Time" {
+		switch modelField.DbType {
+		case "time.Time":
 			t := ConvertToTime(handleValue)
 			updateField(e.Model.GetModel(), modelField.Name, t)
-		} else {
+		case "bool":
+			boolValue := ConvertToBool(handleValue)
+			updateField(e.Model.GetModel(), modelField.Name, boolValue)
+		default:
 			updateField(e.Model.GetModel(), modelField.Name, handleValue)
 		}
 

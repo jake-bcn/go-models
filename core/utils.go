@@ -3,7 +3,6 @@ package core
 import (
 	"reflect"
 	"strconv"
-
 	"time"
 )
 
@@ -163,6 +162,23 @@ func ConvertToFloat32(data interface{}) float32 {
 	num := ConvertToFloat64(data)
 
 	return float32(num)
+}
+
+func ConvertToBool(data interface{}) bool {
+	// try to convert arbitrary value to bool
+	if b, ok := data.(bool); ok {
+		return b
+	}
+	// fall back to string representation
+	str := ConvertToString(data)
+	if str == "" {
+		return false
+	}
+	// strconv.ParseBool accepts 1, t, T, TRUE, true, True, etc.
+	if v, err := strconv.ParseBool(str); err == nil {
+		return v
+	}
+	return false
 }
 
 func ConvertToTimeString(data interface{}) string {

@@ -1,6 +1,7 @@
   CREATE TABLE IF NOT EXISTS `user` (
   `entity_id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `age`  int unsigned not null default 0,
+  `is_active` tinyint(1)  null ,
   `created_at` datetime(3),
   `updated_at` datetime(3),
    PRIMARY KEY (`entity_id`)
